@@ -1,0 +1,33 @@
+{
+  "name": "shan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "start": "webpack-dev-server --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nick-zhu/Shan.git"
+  },
+  "keywords": [],
+  "author": "Nick-Zhu <hanzhang1990@gmail.com> (https://github.com/nick-zhu)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nick-zhu/Shan/issues"
+  },
+  "homepage": "https://github.com/nick-zhu/Shan#readme",
+  "devDependencies": {
+    "clean-webpack-plugin": "^0.1.19",
+    "css-loader": "^0.28.11",
+    "file-loader": "^1.1.11",
+    "html-webpack-plugin": "^3.0.6",
+    "style-loader": "^0.20.3",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.12",
+    "webpack-dev-server": "^3.1.1"
+  }
+}
