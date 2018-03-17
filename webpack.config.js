@@ -1,17 +1,17 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const cleanWebpackPlugin = require('clean-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-module.exports = {
+const config = {
   entry: './src/index.js',
-  devtool: 'cheap-module-source-map',
+  devtool: process.env.USE_DEVTOOL ? 'cheap-module-source-map' : false,
   devServer: {
     contentBase: './dist'
   },
   plugins: [
     new cleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
-      title: 'Shan',
       template: './src/index.html'
     })
   ],
@@ -43,3 +43,10 @@ module.exports = {
     ]
   }
 };
+
+if (!process.env.USE_DEVTOOL) {
+  const UJSplugin = new UglifyJSPlugin();
+  config.plugins.push(UJSplugin);
+}
+
+module.exports = config;
