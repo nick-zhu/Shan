@@ -1,6 +1,6 @@
 import Button from './Button';
-import './style.css';
-import Pika from './pika.jpg';
+import './stylesheets/style.css';
+import Pika from './images/pika.jpg';
 
 var wrapper = document.querySelector('.wrapper');
 let button = new Button();
