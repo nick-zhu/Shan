@@ -2,12 +2,31 @@ import Button from './Button';
 import './stylesheets/style.css';
 import Pika from './images/pika.jpg';
 
-var wrapper = document.querySelector('.wrapper');
-let button = new Button();
-button = button.render();
+const createDOMFromString = (domString) => {
+  const container = document.createElement('div');
+  container.innerHTML = domString;
 
-let pika = new Image();
-pika.src = Pika;
+  return container;
+}
 
-button.appendChild(pika);
-wrapper.appendChild(button);
+class LikeButton {
+  render() {
+    this.element = createDOMFromString(`
+      <button class='like-btn'>
+        <span class='like-text'>Like</span>
+        <span>👍</span>
+      </button>
+    `)
+    this.element.addEventListener('click', ()=> console.log('click', false));
+    return this.element;
+  }
+}
+
+const wrapper = document.querySelector('.wrapper')
+const likeButton1 = new LikeButton()
+wrapper.appendChild(likeButton1.render());
+
+const likeButton2 = new LikeButton()
+wrapper.appendChild(likeButton2.render());
+
+
