@@ -1,37 +1,18 @@
-import Button from './Button';
+import LikeButton from './Button';
 import './stylesheets/style.css';
 import Pika from './images/pika.jpg';
 
-const createDOMFromString = (domString) => {
-  const container = document.createElement('div');
-  container.innerHTML = domString;
-
-  return container;
-}
-
-class LikeButton {
-
-  toggleLike = function() {
-    console.log(this);
-  }
-
-  render() {
-    this.element = createDOMFromString(`
-      <button class='like-btn'>
-        <span class='like-text'>Like</span>
-        <span>👍</span>
-      </button>
-    `)
-    this.element.addEventListener('click', this.toggleLike, false);
-    return this.element;
-  }
-}
-
 const wrapper = document.querySelector('.wrapper')
-const likeButton1 = new LikeButton()
-wrapper.appendChild(likeButton1.render());
 
-const likeButton2 = new LikeButton()
-wrapper.appendChild(likeButton2.render());
+const mount = (component, wrapper) => {
+  wrapper.appendChild(component.renderDOM());
+  component.container = wrapper;
+  // component.onStateChange = (oldElement, newElement) => {
+  //   wrapper.insertBefore(newElement, oldElement);
+  //   wrapper.removeChild(oldElement);
+  // };
+};
 
 
+mount(new LikeButton({isLiked: true}), wrapper);
+mount(new LikeButton(), wrapper);
