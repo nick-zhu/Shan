@@ -3,8 +3,9 @@ import Component from './Component';
 export default class LikeButton extends Component {
   constructor(props) {
     super(props);
-    this.state = { isLiked: false };
-    Object.assign(this.state, props);
+    this.state = {
+      isLiked: this.props.isLiked ? true : false
+    };
   }
 
   toggleLike = () => {
