@@ -10,6 +10,11 @@ const createDOMFromString = (domString) => {
 }
 
 class LikeButton {
+
+  toggleLike = function() {
+    console.log(this);
+  }
+
   render() {
     this.element = createDOMFromString(`
       <button class='like-btn'>
@@ -17,7 +22,7 @@ class LikeButton {
         <span>👍</span>
       </button>
     `)
-    this.element.addEventListener('click', ()=> console.log('click', false));
+    this.element.addEventListener('click', this.toggleLike, false);
     return this.element;
   }
 }
