@@ -12,7 +12,8 @@ const config = {
   plugins: [
     new cleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
-      template: './src/index.html'
+      template: './src/index.html',
+      favicon: 'favicon.ico'
     })
   ],
   output: {
@@ -29,7 +30,7 @@ const config = {
         ]
       },
       {
-        test: /\.(png|svg|jpg|gif)$/,
+        test: /\.(png|svg|jpg|gif|ico)$/,
         use: [
           'file-loader'
         ]
