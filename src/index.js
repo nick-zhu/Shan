@@ -2,21 +2,34 @@ import { create } from "domain";
 
 // Creaet a vElement
 
-function createVElement(tag, config, children=null) {
-  const { className } = config;
+function createVElement(tag, config, children = null) {
+  const { className, style } = config;
 
   return {
-    tag: tag,
+    tag,
+    style,
     props: {
       children: children
     },
-    className: className,
+    className,
     dom: null
   }
 }
 
+function mount(input, parentDomNode) {
+  if (typeof input === 'string' || typeof input === 'number') {
+    mountVText(input, parentDomNode);
+  } else {
+    mountVElement(input, parentDomNode);
+  }
+}
+
+function mountVText(vText, parentDomNode) {
+  parentDomNode.textContent = vText;
+}
+
 function mountVElement(vElement, parentDomNode) {
-  const { tag, className, props } = vElement;
+  const { tag, className, style, props } = vElement;
 
   // creat a native DOM node
   const domNode = document.createElement(tag);
@@ -24,15 +37,21 @@ function mountVElement(vElement, parentDomNode) {
   // save the DOM node on vElement
   vElement.dom = domNode;
 
-  if(className) {
+  if (className) {
     domNode.className = className;
   }
 
   // if has children, recursively mount elements
-  if(props.children) {
-    props.children.forEach( ele => {
-      mountVElement(ele, domNode);
+  if (props.children) {
+    props.children.forEach(ele => {
+      mount(ele, domNode);
     })
+  }
+
+  if (style) {
+    Object.keys(style).forEach(skey => {
+      domNode.style[skey] = style[skey]
+    });
   }
 
   parentDomNode.appendChild(domNode);
@@ -40,20 +59,23 @@ function mountVElement(vElement, parentDomNode) {
 
 const root = document.querySelector('.root')
 
-const myApp = createVElement('div', { className: 'my-class' }, [
-  createVElement('h1', { className:'my-header' }),
-  createVElement('div', { className:'my-container' }, [
-    createVElement('div', { className:'my-sub-container' }, [
-      createVElement('div', { className:'my-sub-sub-container' }, [
-        createVElement('div', { className:'my-sub-sub-sub-container' }, [
-          createVElement('div', { className:'my-sub-sub-sub-sub-container' }, [
-            createVElement('div', { className:'my-sub-sub-sub-sub-sub-container' }, []),
-            createVElement('h1', { className:'my-sub-sub-sub-sub-sub-header' }, [])
-          ])
-        ])
-      ])
-    ]),
+const myApp = createVElement('div',
+  {
+    style: { background: 'red', height: '100px' }
+  },
+  [
+    createVElement('h1',
+      {
+        style: { color: 'white' }
+      },
+      ['Hello World']
+    ),
+    createVElement('div',
+      {
+        className: 'my-container'
+      },
+      [createVElement('p', {}, ['A container with some nice paragraph'])]
+    )
   ])
-]);
 
-mountVElement(myApp, root);
+mount(myApp, root);
