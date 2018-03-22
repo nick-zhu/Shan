@@ -1,7 +1,12 @@
-import { create } from "domain";
+function createVComponent(tag, props) {
+  return {
+    tag,
+    props,
+    dom: null
+  }
+}
 
 // Creaet a vElement
-
 function createVElement(tag, config, children = null) {
   const { className, style } = config;
 
@@ -16,16 +21,32 @@ function createVElement(tag, config, children = null) {
   }
 }
 
-function mount(input, parentDomNode) {
-  if (typeof input === 'string' || typeof input === 'number') {
-    mountVText(input, parentDomNode);
-  } else {
-    mountVElement(input, parentDomNode);
+function createElement(tag, config, children) {
+  // If tag is function, means it's a component
+  // example: class app extends component: app is a function
+  if (typeof tag === 'function') {
+    const vNode = createVComponent(tag, config);
+    return vNode;
   }
+
+  const vNode = createVElement(tag, config, children);
+  return vNode;
+}
+
+class Component {
+  constructor(props = {}) {
+    this.props = props;
+  }
+
+  setState(partialNewState) {}
+
+  // Will be overwritten
+  render() {}
 }
 
 function mountVText(vText, parentDomNode) {
   parentDomNode.textContent = vText;
+  return vText;
 }
 
 function mountVElement(vElement, parentDomNode) {
@@ -55,27 +76,49 @@ function mountVElement(vElement, parentDomNode) {
   }
 
   parentDomNode.appendChild(domNode);
+
+  return domNode;
+}
+
+function mountVComponent(vComponent, parentDomNode) {
+  const { tag, props } = vComponent;
+
+  // instanciate the vComponent
+  const instance = new tag(props);
+
+  // render will return nodes, could be either vElement or vComponent
+  const currentElement = instance.render();
+
+  const dom = mount(currentElement, parentDomNode);
+
+  vComponent._instance = instance;
+  vComponent.dom = dom;
+
+  parentDomNode.appendChild(dom);
+
+  return dom;
+}
+
+function mount(input, parentDomNode) {
+  if (typeof input === 'string' || typeof input === 'number') {
+    return mountVText(input, parentDomNode);
+  }
+  else if (typeof input.tag === 'function') {
+    return mountVComponent(input, parentDomNode);
+  }
+  else {
+    return mountVElement(input, parentDomNode);
+  }
 }
 
 const root = document.querySelector('.root')
 
-const myApp = createVElement('div',
-  {
-    style: { background: 'red', height: '100px' }
-  },
-  [
-    createVElement('h1',
-      {
-        style: { color: 'white' }
-      },
-      ['Hello World']
-    ),
-    createVElement('div',
-      {
-        className: 'my-container'
-      },
-      [createVElement('p', {}, ['A container with some nice paragraph'])]
-    )
-  ])
+class App extends Component {
+  render() {
+    return createElement('div', { style: { height: '100px', background: 'red'} }, [
+      createElement('h1', {}, [ this.props.message ])
+    ]);
+  }
+}
 
-mount(myApp, root);
+mount(createElement(App, { message: 'Hello there!' }), root);
