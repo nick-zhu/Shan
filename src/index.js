@@ -36,12 +36,35 @@ function createElement(tag, config, children) {
 class Component {
   constructor(props = {}) {
     this.props = props;
+    this.state = {};
+
+    this._currentElement = null;
+    this._pendingState = null;
+    this._parentNode = null;
   }
 
-  setState(partialNewState) {}
+  updateComponent() {
+    const preState = this.state;
+    const preElement = this._currentElement;
+
+    if (this._pendingState !== preState) {
+      this.state = this._pendingState;
+      const nextRenderedElement = this.render();
+      this._currentElement = nextRenderedElement;
+
+      mount(nextRenderedElement, this._parentNode);
+    }
+
+    this._pendingState = null;
+  }
+
+  setState(partialNewState) {
+    this._pendingState = Object.assign({}, this.state, partialNewState);
+    this.updateComponent();
+  }
 
   // Will be overwritten
-  render() {}
+  render() { }
 }
 
 function mountVText(vText, parentDomNode) {
@@ -87,9 +110,12 @@ function mountVComponent(vComponent, parentDomNode) {
   const instance = new tag(props);
 
   // render will return nodes, could be either vElement or vComponent
-  const currentElement = instance.render();
+  const nextRenderedElement = instance.render();
 
-  const dom = mount(currentElement, parentDomNode);
+  instance._currentElement = nextRenderedElement;
+  instance._parentNode = parentDomNode;
+
+  const dom = mount(nextRenderedElement, parentDomNode);
 
   vComponent._instance = instance;
   vComponent.dom = dom;
@@ -114,9 +140,20 @@ function mount(input, parentDomNode) {
 const root = document.querySelector('.root')
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      counter: 1
+    }
+
+    setInterval(() => {
+      this.setState({ counter: this.state.counter + 1 })
+    }, 1000);
+  }
+
   render() {
-    return createElement('div', { style: { height: '100px', background: 'red'} }, [
-      createElement('h1', {}, [ this.props.message ])
+    return createElement('div', { style: { height: '100px', background: 'red' } }, [
+      createElement('h1', {}, [this.state.counter])
     ]);
   }
 }
