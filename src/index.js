@@ -49,6 +49,32 @@ function updateVElement(prevElement, nextElement) {
   }
 }
 
+function updateVComponent(prevComponent, nextComponent) {
+  //get the instance. This is Component. It also holds the props and _currentElement
+  const { _instance } = prevComponent;
+  const { _currentElement } = _instance;
+
+  //get the new and old props
+  const prevProps = prevComponent.props;
+  const nextProps = nextComponent.props;
+
+  nextComponent.dom = prevComponent.dom;
+  nextComponent._instance = _instance;
+  nextComponent._instance.props = nextProps;
+
+
+  if (_instance.shouldComponentUpdate()) {
+    const prevRenderedElement = _currentElement;
+    const nextRenderedElement = _instance.render();
+
+    //finaly save the nextRenderedElement for the next iteration!
+    nextComponent._instance._currentElement = nextRenderedElement;
+
+    //call update
+    update(prevRenderedElement, nextRenderedElement, _instance._parentNode);
+  }
+}
+
 function updateVText(prevText, nextText, parentDomNode) {
   if (prevText !== nextText) {
     parentDomNode.firstChild.nodeValue = nextText
@@ -81,6 +107,8 @@ function update(prevElement, nextElement) {
   if (prevElement.tag === nextElement.tag) {
     if (typeof prevElement.tag === 'string') {
       updateVElement(prevElement, nextElement);
+    } else if (typeof prevElement.tag === 'function') {
+      updateVComponent(prevElement, nextElement);
     }
   } else {
 
@@ -97,6 +125,10 @@ class Component {
     this._parentNode = null;
   }
 
+  shouldComponentUpdate() {
+    return true;
+  }
+
   updateComponent() {
     const preState = this.state;
     const preElement = this._currentElement;
@@ -105,7 +137,6 @@ class Component {
       this.state = this._pendingState;
       const nextRenderedElement = this.render();
       this._currentElement = nextRenderedElement;
-
       update(preElement, nextRenderedElement);
     }
 
@@ -201,6 +232,11 @@ class NestedApp extends Component {
   constructor(props) {
     super(props);
   }
+
+  shouldComponentUpdate() {
+    return this.props.counter % 2;
+  }
+
   render() {
     return createElement('h1', { style: { color: '#' + Math.floor(Math.random() * 16777215).toString(16) } }, `The count from parent is: ${this.props.counter}`)
   }
