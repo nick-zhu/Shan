@@ -33,6 +33,60 @@ function createElement(tag, config, children) {
   return vNode;
 }
 
+function updateVElement(prevElement, nextElement) {
+  const dom = prevElement.dom;
+  nextElement.dom = dom;
+
+  // update children
+  if (nextElement.props.children) {
+    updateChildren(prevElement.props.children, nextElement.props.children, dom);
+  }
+
+  // update style
+  const nextStyle = nextElement.style;
+  if (prevElement.style !== nextStyle) {
+    Object.keys(nextStyle).forEach((s) => dom.style[s] = nextStyle[s])
+  }
+}
+
+function updateVText(prevText, nextText, parentDomNode) {
+  if (prevText !== nextText) {
+    parentDomNode.firstChild.nodeValue = nextText
+  }
+}
+
+function updateChildren(prevChildren, nextChildren, parentDomNode) {
+  if (!Array.isArray(nextChildren)) {
+    nextChildren = [nextChildren];
+  }
+  if (!Array.isArray(prevChildren)) {
+    prevChildren = [prevChildren];
+  }
+
+  for (let i = 0; i < nextChildren.length; i++) {
+    const nextChild = nextChildren[i];
+    const prevChild = prevChildren[i];
+
+    //Check if the vNode is a vText
+    if (typeof nextChild === 'string' && typeof prevChild === 'string') {
+      updateVText(prevChild, nextChild, parentDomNode);
+      continue;
+    } else {
+      update(prevChild, nextChild);
+    }
+  }
+}
+
+function update(prevElement, nextElement) {
+  if (prevElement.tag === nextElement.tag) {
+    if (typeof prevElement.tag === 'string') {
+      updateVElement(prevElement, nextElement);
+    }
+  } else {
+
+  }
+}
+
 class Component {
   constructor(props = {}) {
     this.props = props;
@@ -52,7 +106,7 @@ class Component {
       const nextRenderedElement = this.render();
       this._currentElement = nextRenderedElement;
 
-      mount(nextRenderedElement, this._parentNode);
+      update(preElement, nextRenderedElement);
     }
 
     this._pendingState = null;
@@ -87,9 +141,13 @@ function mountVElement(vElement, parentDomNode) {
 
   // if has children, recursively mount elements
   if (props.children) {
-    props.children.forEach(ele => {
-      mount(ele, domNode);
-    })
+    if (Array.isArray(props.children)) {
+      props.children.forEach(ele => {
+        mount(ele, domNode);
+      })
+    } else {
+      mount(props.children, domNode);
+    }
   }
 
   if (style) {
@@ -139,21 +197,32 @@ function mount(input, parentDomNode) {
 
 const root = document.querySelector('.root')
 
+class NestedApp extends Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return createElement('h1', { style: { color: '#' + Math.floor(Math.random() * 16777215).toString(16) } }, `The count from parent is: ${this.props.counter}`)
+  }
+}
+
 class App extends Component {
   constructor() {
     super();
     this.state = {
       counter: 1
     }
-
     setInterval(() => {
       this.setState({ counter: this.state.counter + 1 })
-    }, 1000);
+    }, 500);
   }
 
   render() {
-    return createElement('div', { style: { height: '100px', background: 'red' } }, [
-      createElement('h1', {}, [this.state.counter])
+    const { counter } = this.state;
+    return createElement('div', { style: { height: `${10 * counter}px`, background: '#' + Math.floor(Math.random() * 16777215).toString(16) } }, [
+      `the counter is ${counter}`,
+      createElement('h1', { style: { color: '#' + Math.floor(Math.random() * 16777215).toString(16) } }, `${'BOOM! '.repeat(counter)}`),
+      createElement(NestedApp, { counter: counter })
     ]);
   }
 }
