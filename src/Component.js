@@ -1,35 +1,38 @@
+import {update} from './shan';
+
 export default class Component {
   constructor(props = {}) {
     this.props = props;
     this.state = {};
+
+    this._currentElement = null;
+    this._pendingState = null;
+    this._parentNode = null;
   }
 
-  setState(state = {}) {
-    Object.assign(this.state, state);
-    let oldElement = this.element;
-    this.element = this.renderDOM();
+  shouldComponentUpdate() {
+    return true;
+  }
 
-    if(this.onStateChange) {
-      this.onStateChange(oldElement, this.element)
+  updateComponent() {
+    const preState = this.state;
+    const preElement = this._currentElement;
+
+    if (this._pendingState !== preState) {
+      this.state = this._pendingState;
+      const nextRenderedElement = this.render();
+      this._currentElement = nextRenderedElement;
+      update(preElement, nextRenderedElement);
     }
 
-    // If pass in wrapper
-    this.container.insertBefore(this.element, oldElement);
-    this.container.removeChild(oldElement);
+    this._pendingState = null;
   }
 
-  createDOMFromString(domString) {
-    const container = document.createElement('div');
-    container.innerHTML = domString;
-
-    return container;
+  setState(partialNewState) {
+    this._pendingState = Object.assign({}, this.state, partialNewState);
+    this.updateComponent();
   }
 
-  renderDOM() {
-    this.element = this.createDOMFromString(this.render());
-    if(this.onClick) {
-      this.element.addEventListener('click', this.onClick, false);
-    }
-    return this.element;
-  }
+  // Will be overwritten
+  render() { }
 }

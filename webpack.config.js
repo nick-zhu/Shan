@@ -12,7 +12,7 @@ const config = {
   plugins: [
     new cleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
-      template: './src/index.html',
+      template: './src/template/index.html',
       favicon: 'favicon.ico'
     })
   ],
