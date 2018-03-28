@@ -9,8 +9,9 @@ import { updateVElement } from './vElement/update';
 import { mountVText } from './vText/mount';
 import { updateVText } from './vText/update';
 
+import ComponentClass from './Component';
 
-export function createElement(tag, config, children) {
+function createElement(tag, config, ...children) {
   // If tag is function, means it's a component
   // example: class app extends component: app is a function
   if (typeof tag === 'function') {
@@ -67,3 +68,12 @@ export function mount(input, parentDomNode) {
     return mountVElement(input, parentDomNode);
   }
 }
+
+const React = {
+  createElement,
+  render: mount,
+  Component
+}
+
+export default React;
+export const Component = ComponentClass;

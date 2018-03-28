@@ -4,7 +4,7 @@ const cleanWebpackPlugin = require('clean-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
-  entry: './src/index.js',
+  entry: './src/index.jsx',
   devtool: process.env.USE_DEVTOOL ? 'cheap-module-source-map' : false,
   devServer: {
     contentBase: './dist'

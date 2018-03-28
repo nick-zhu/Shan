@@ -1,5 +1,5 @@
 // Creaet a vElement
-export function createVElement(tag, config, children = null) {
+export function createVElement(tag, config, children) {
   const { className, style } = config;
 
   return {
