@@ -7,6 +7,60 @@ function mountIdIncrement() {
   return mountId++;
 }
 
+function mountNativeElement(vNode, parentDomNode, instance) {
+  const domNode = renderByShan(vNode, parentDomNode, false, {}, instance);
+  vNode._hostNode = domNode;
+  vNode._mountId = mountIdIncrement();
+  return domNode;
+}
+
+function mountTextComponent(vNode, domNode) {
+  let fixText = vNode.props === 'createPortal' ? '' : vNode.props;
+  let textDomNode = document.createTextNode(fixText);
+  domNode.appendChild(textDomNode);
+  vNode._hostNode = textDomNode;
+  vNode._mountId = mountIdIncrement();
+  return textDomNode;
+}
+
+function mountChilren(childrenVNode, parentDomNode, parentContext, instance, parentVNode) {
+  let childrenType = typeNum(childrenVNode);
+  let flattenChildrenList = childrenVNode;
+
+  if (childrenVNode === undefined) {
+    flattenChildrenList = flattenChildren(childrenVNode, parentVNode);
+  }
+
+  if (childrenType === 8 && childrenVNode !== undefined) { //vnode
+    flattenChildrenList = flattenChildren(childrenVNode, parentVNode);
+
+    if (typeNum(childrenVNode.type) === 5) {
+      flattenChildrenList._hostNode = renderByShan(flattenChildrenList, parentDomNode, false, parentContext, instance);
+    } else if (typeNum(childrenVNode.type) === 3 || typeNum(childrenVNode.type) === 4) {
+      flattenChildrenList._hostNode = mountNativeElement(flattenChildrenList, parentDomNode, instance);
+    }
+  }
+
+  if (childrenType === 7) { //list
+    flattenChildrenList = flattenChildren(childrenVNode, parentVNode);
+    flattenChildrenList.forEach((item) => {
+      if (item) {
+        if (typeof item.type === 'function') {
+          mountComponent(item, parentDomNode, parentContext);
+        } else {
+          renderByShan(item, parentDomNode, false, parentContext, instance);
+        }
+      }
+    });
+  }
+
+  if (childrenType === 4 || childrenType === 3) { //string or number
+    flattenChildrenList = flattenChildren(childrenVNode, parentVNode);
+    mountTextComponent(flattenChildrenList, parentDomNode);
+  }
+  return flattenChildrenList;
+}
+
 function renderByShan(vNode, container, isUpdate, parentContext, instance) {
   const { type, props } = vNode;
 
@@ -35,10 +89,10 @@ function renderByShan(vNode, container, isUpdate, parentContext, instance) {
   vNode._hostNode = domNode; // Cache node
 
   if (typeNum(domNode) === 7) { // is Array
-    if(isUpdate) return domNode;
+    if (isUpdate) return domNode;
     else {
-      if( container && domNode && container.nodeName !== '#text') {
-        domNode.forEach( DOM_SINGLE_NODE => {
+      if (container && domNode && container.nodeName !== '#text') {
+        domNode.forEach(DOM_SINGLE_NODE => {
           container.appendChild(DOM_SINGLE_NODE);
         });
       }
@@ -49,7 +103,7 @@ function renderByShan(vNode, container, isUpdate, parentContext, instance) {
   setRef();
   mapProps();
 
-  if( isUpdate) return domNode;
+  if (isUpdate) return domNode;
   else {
     vNode._mountId = mountIdIncrement();
     if (container && domNode && container.nodeName !== '#text') {
